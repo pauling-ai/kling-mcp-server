@@ -150,11 +150,11 @@ const TOOLS: Tool[] = [
       properties: {
         image_url: {
           type: 'string',
-          description: 'URL of the starting image',
+          description: 'URL or local file path of the starting image (PNG, JPG, JPEG, WebP)',
         },
         image_tail_url: {
           type: 'string',
-          description: 'URL of the ending image (optional)',
+          description: 'URL or local file path of the ending image (optional)',
         },
         prompt: {
           type: 'string',
@@ -244,11 +244,11 @@ const TOOLS: Tool[] = [
       properties: {
         video_url: {
           type: 'string',
-          description: 'URL of the video to apply lip-sync to (must contain clear human face)',
+          description: 'URL or local file path of the video to apply lip-sync to (must contain clear human face)',
         },
         audio_url: {
           type: 'string',
-          description: 'URL of custom audio file (mp3, wav, flac, ogg; max 20MB, 60s). If provided, TTS parameters are ignored',
+          description: 'URL or local file path of custom audio file (mp3, wav, flac, ogg; max 20MB, 60s). If provided, TTS parameters are ignored',
         },
         tts_text: {
           type: 'string',
@@ -285,7 +285,7 @@ const TOOLS: Tool[] = [
           items: {
             type: 'string',
           },
-          description: 'Array of image URLs. Use 2 images for hug/kiss/heart_gesture effects, 1 image for squish/expansion/fuzzyfuzzy/bloombloom/dizzydizzy effects',
+          description: 'Array of image URLs or local file paths. Use 2 images for hug/kiss/heart_gesture effects, 1 image for squish/expansion/fuzzyfuzzy/bloombloom/dizzydizzy effects',
         },
         effect_scene: {
           type: 'string',
@@ -338,7 +338,7 @@ const TOOLS: Tool[] = [
         },
         ref_image_url: {
           type: 'string',
-          description: 'Optional reference image URL for character consistency',
+          description: 'Optional reference image URL or local file path for character consistency',
         },
         ref_image_weight: {
           type: 'number',
@@ -372,14 +372,14 @@ const TOOLS: Tool[] = [
       properties: {
         person_image_url: {
           type: 'string',
-          description: 'URL of the person image to try clothes on',
+          description: 'URL or local file path of the person image to try clothes on',
         },
         cloth_image_urls: {
           type: 'array',
           items: {
             type: 'string',
           },
-          description: 'Array of clothing image URLs (1-5 items). Multiple items will be combined into a complete outfit',
+          description: 'Array of clothing image URLs or local file paths (1-5 items). Multiple items will be combined into a complete outfit',
           minItems: 1,
           maxItems: 5,
         },

@@ -151,19 +151,56 @@ export default class KlingClient {
     return jwt;
   }
   
-  private validateUrl(url: string | undefined): string | undefined {
+  private async processMediaUrl(url: string | undefined): Promise<string | undefined> {
     if (!url) return undefined;
-    if (!url.startsWith('http://') && !url.startsWith('https://')) {
-      throw new Error('Only publicly accessible HTTP(S) URLs are supported. Local file paths and file:// URLs are not accepted for security reasons.');
+
+    // If it's already an HTTP(S) URL, use it directly
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
     }
-    return url;
+
+    // Handle file:// URLs
+    if (url.startsWith('file://')) {
+      url = url.replace('file://', '');
+    }
+
+    // Read local file and convert to base64 data URI
+    try {
+      const buffer = await fs.readFile(url);
+      const ext = path.extname(url).toLowerCase();
+      const mimeType = this.getMimeType(ext);
+      const base64 = buffer.toString('base64');
+      return `data:${mimeType};base64,${base64}`;
+    } catch (err) {
+      throw new Error(`Failed to read local file: ${err instanceof Error ? err.message : String(err)}`);
+    }
+  }
+
+  private getMimeType(ext: string): string {
+    const map: Record<string, string> = {
+      '.jpg': 'image/jpeg',
+      '.jpeg': 'image/jpeg',
+      '.png': 'image/png',
+      '.gif': 'image/gif',
+      '.webp': 'image/webp',
+      '.mp4': 'video/mp4',
+      '.mov': 'video/quicktime',
+      '.webm': 'video/webm',
+      '.mp3': 'audio/mpeg',
+      '.wav': 'audio/wav',
+      '.flac': 'audio/flac',
+      '.ogg': 'audio/ogg',
+      '.m4a': 'audio/mp4',
+      '.aac': 'audio/aac',
+    };
+    return map[ext] || 'application/octet-stream';
   }
 
   async generateVideo(request: VideoGenerationRequest): Promise<{ task_id: string }> {
     const path = '/v1/videos/text2video';
     
-    // Validate any image URLs
-    const ref_image_url = this.validateUrl(request.ref_image_url);
+    // Process any image URLs (local files become base64 data URIs)
+    const ref_image_url = await this.processMediaUrl(request.ref_image_url);
     
     const body: any = {
       prompt: request.prompt,
@@ -199,8 +236,8 @@ export default class KlingClient {
       throw new Error('image_url is required for image-to-video generation');
     }
     
-    // Validate the image URL
-    const imageUrl = this.validateUrl(request.image_url);
+    // Process the image URL (local files become base64 data URIs)
+    const imageUrl = await this.processMediaUrl(request.image_url);
 
     const body: any = {
       image: imageUrl, // API uses 'image' not 'image_url'
@@ -262,17 +299,23 @@ export default class KlingClient {
   async createLipsync(request: LipsyncRequest): Promise<{ task_id: string }> {
     const path = '/v1/videos/lip-sync';
     
-    // Validate video URL
-    const video_url = this.validateUrl(request.video_url);
+    // Process video URL (local files become base64 data URIs)
+    const video_url = await this.processMediaUrl(request.video_url);
     
     const input: any = {
       video_url: video_url!,
     };
 
     if (request.audio_url) {
+      const processedAudio = await this.processMediaUrl(request.audio_url);
       input.mode = 'audio2video';
-      input.audio_type = 'url';
-      input.audio_url = request.audio_url;
+      if (processedAudio && processedAudio.startsWith('data:')) {
+        input.audio_type = 'file';
+        input.audio_file = processedAudio.replace(/^data:[^;]+;base64,/, '');
+      } else {
+        input.audio_type = 'url';
+        input.audio_url = processedAudio;
+      }
     } else if (request.tts_text) {
       input.mode = 'text2video';
       input.text = request.tts_text;
@@ -337,12 +380,14 @@ export default class KlingClient {
       throw new Error(`Effect "${request.effect_scene}" requires exactly 1 image`);
     }
     
-    // Validate all image URLs
-    const validatedImageUrls = request.image_urls.map(url => this.validateUrl(url)).filter((url): url is string => url !== undefined);
+    // Process all image URLs (local files become base64 data URIs)
+    const processedImageUrls = await Promise.all(
+      request.image_urls.map(url => this.processMediaUrl(url))
+    );
     
     const body: any = {
       input: {
-        image_urls: validatedImageUrls,
+        image_urls: processedImageUrls.filter((url): url is string => url !== undefined),
         effect_scene: request.effect_scene,
         duration: request.duration || '5',
       }
@@ -365,8 +410,8 @@ export default class KlingClient {
   async generateImage(request: ImageGenerationRequest): Promise<{ task_id: string }> {
     const path = '/v1/images/generation';
     
-    // Validate reference image URL if provided
-    const ref_image_url = this.validateUrl(request.ref_image_url);
+    // Process reference image URL if provided
+    const ref_image_url = await this.processMediaUrl(request.ref_image_url);
     
     const body: any = {
       prompt: request.prompt,
@@ -416,9 +461,11 @@ export default class KlingClient {
       throw new Error('Maximum 5 clothing items allowed per request');
     }
     
-    // Validate all image URLs
-    const person_image_url = this.validateUrl(request.person_image_url);
-    const cloth_image_urls = request.cloth_image_urls.map(url => this.validateUrl(url)).filter((url): url is string => url !== undefined);
+    // Process all image URLs
+    const person_image_url = await this.processMediaUrl(request.person_image_url);
+    const cloth_image_urls = await Promise.all(
+      request.cloth_image_urls.map(url => this.processMediaUrl(url))
+    );
     
     const body = {
       model_name: request.model_name || 'kolors-virtual-try-on-v1.5',

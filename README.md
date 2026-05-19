@@ -291,11 +291,22 @@ Never lose your creations - everything is saved locally with descriptive filenam
 }
 ```
 
-### URL Requirements
+### Local File Support
 
-For security reasons, this server only accepts **publicly accessible HTTP(S) URLs** for images, videos, and audio files. Local file paths and `file://` URLs are **not supported**.
+Local files are supported and are read directly from your machine. They are **base64-encoded and sent inline** to the Kling API — your files are never uploaded to third-party storage.
 
-If you need to use a local file, upload it to a temporary hosting service first (e.g., Imgur, transfer.sh, or your own cloud storage) and provide the resulting public URL.
+Supported inputs:
+- **Images**: PNG, JPG, JPEG, GIF, WebP
+- **Audio** (for lip-sync): MP3, WAV, FLAC, OGG, M4A, AAC
+- **Videos**: MP4, MOV, WebM (sent inline; very large files may hit API limits)
+
+Examples:
+```javascript
+image_url: "/Users/me/image.jpg"           // Local file path
+image_url: "file:///Users/me/image.jpg"    // File URL
+image_url: "https://example.com/image.jpg" // Public URL (used directly)
+audio_url: "/Users/me/audio.mp3"           // Local audio for lip-sync
+```
 
 ### Image Generation Options
 ```javascript
