@@ -19,13 +19,17 @@ export interface CameraControl {
   config?: CameraControlConfig;
 }
 
+export type ModelName = 'kling-v1' | 'kling-v1-5' | 'kling-v1-6' | 'kling-v2-master' | 'kling-v2-1' | 'kling-v2-1-master' | 'kling-v2-5-turbo' | 'kling-v2-6' | 'kling-v3';
+export type VideoMode = 'std' | 'pro' | '4k';
+export type VideoDuration = '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10' | '11' | '12' | '13' | '14' | '15';
+
 export interface VideoGenerationRequest {
   prompt: string;
   negative_prompt?: string;
-  model_name?: 'kling-v1' | 'kling-v1.5' | 'kling-v1.6' | 'kling-v2-master';
+  model_name?: ModelName;
   aspect_ratio?: '16:9' | '9:16' | '1:1';
-  duration?: '5' | '10';
-  mode?: 'standard' | 'professional';
+  duration?: VideoDuration;
+  mode?: VideoMode;
   cfg_scale?: number;
   image_url?: string;
   image_tail_url?: string;
@@ -55,9 +59,9 @@ export interface TaskStatus {
 export interface VideoExtensionRequest {
   task_id: string;
   prompt: string;
-  model_name?: 'kling-v1' | 'kling-v1.5' | 'kling-v1.6' | 'kling-v2-master';
+  model_name?: ModelName;
   duration?: '5';
-  mode?: 'standard' | 'professional';
+  mode?: VideoMode;
 }
 
 export interface LipsyncRequest {
@@ -66,20 +70,20 @@ export interface LipsyncRequest {
   tts_text?: string;
   tts_voice?: string;
   tts_speed?: number;
-  model_name?: 'kling-v1' | 'kling-v1.5' | 'kling-v1.6' | 'kling-v2-master';
+  model_name?: ModelName;
 }
 
 export interface VideoEffectsRequest {
   image_urls: string[];
   effect_scene: 'hug' | 'kiss' | 'heart_gesture' | 'squish' | 'expansion' | 'fuzzyfuzzy' | 'bloombloom' | 'dizzydizzy';
   duration?: '5' | '10';
-  model_name?: 'kling-v1' | 'kling-v1.5' | 'kling-v1.6' | 'kling-v2-master';
+  model_name?: ModelName;
 }
 
 export interface ImageGenerationRequest {
   prompt: string;
   negative_prompt?: string;
-  model_name?: 'kling-v1' | 'kling-v1.5' | 'kling-v1.6' | 'kling-v2-master';
+  model_name?: ModelName;
   aspect_ratio?: '16:9' | '9:16' | '1:1' | '4:3' | '3:4' | '2:3' | '3:2';
   num_images?: number;
   ref_image_url?: string;
@@ -164,54 +168,32 @@ export default class KlingClient {
       url = url.replace('file://', '');
     }
 
-    // Read local file and convert to base64 data URI
+    // Read local file and return raw base64 (no data URI prefix)
     try {
       const buffer = await fs.readFile(url);
-      const ext = path.extname(url).toLowerCase();
-      const mimeType = this.getMimeType(ext);
-      const base64 = buffer.toString('base64');
-      return `data:${mimeType};base64,${base64}`;
+      return buffer.toString('base64');
     } catch (err) {
       throw new Error(`Failed to read local file: ${err instanceof Error ? err.message : String(err)}`);
     }
   }
 
-  private getMimeType(ext: string): string {
-    const map: Record<string, string> = {
-      '.jpg': 'image/jpeg',
-      '.jpeg': 'image/jpeg',
-      '.png': 'image/png',
-      '.gif': 'image/gif',
-      '.webp': 'image/webp',
-      '.mp4': 'video/mp4',
-      '.mov': 'video/quicktime',
-      '.webm': 'video/webm',
-      '.mp3': 'audio/mpeg',
-      '.wav': 'audio/wav',
-      '.flac': 'audio/flac',
-      '.ogg': 'audio/ogg',
-      '.m4a': 'audio/mp4',
-      '.aac': 'audio/aac',
-    };
-    return map[ext] || 'application/octet-stream';
-  }
 
   async generateVideo(request: VideoGenerationRequest): Promise<{ task_id: string }> {
     const path = '/v1/videos/text2video';
     
-    // Process any image URLs (local files become base64 data URIs)
-    const ref_image_url = await this.processMediaUrl(request.ref_image_url);
-    
+    const ref_image = await this.processMediaUrl(request.ref_image_url);
+
     const body: any = {
       prompt: request.prompt,
       negative_prompt: request.negative_prompt || '',
-      cfg_scale: request.cfg_scale || 0.8,
+      cfg_scale: request.cfg_scale || 0.5,
       aspect_ratio: request.aspect_ratio || '16:9',
       duration: request.duration || '5',
-      model_name: request.model_name || 'kling-v2-master', // V2-master is default
-      ...(request.image_url && { image_url: request.image_url }),
-      ...(request.image_tail_url && { image_tail_url: request.image_tail_url }),
-      ...(ref_image_url && { ref_image_url }),
+      mode: request.mode || 'std',
+      model_name: request.model_name || 'kling-v2-master',
+      ...(request.image_url && { image: request.image_url }),
+      ...(request.image_tail_url && { image_tail: request.image_tail_url }),
+      ...(ref_image && { ref_image }),
       ...(request.ref_image_weight && { ref_image_weight: request.ref_image_weight }),
       ...(request.camera_control && { camera_control: request.camera_control }),
       ...(request.callback_url && { callback_url: request.callback_url }),
@@ -236,17 +218,16 @@ export default class KlingClient {
       throw new Error('image_url is required for image-to-video generation');
     }
     
-    // Process the image URL (local files become base64 data URIs)
-    const imageUrl = await this.processMediaUrl(request.image_url);
+    const image = await this.processMediaUrl(request.image_url);
 
     const body: any = {
-      image: imageUrl, // API uses 'image' not 'image_url'
+      image,
       prompt: request.prompt,
       negative_prompt: request.negative_prompt || '',
-      cfg_scale: request.cfg_scale || 0.8,
+      cfg_scale: request.cfg_scale || 0.5,
       duration: request.duration || '5',
-      aspect_ratio: request.aspect_ratio || '16:9',
-      model_name: request.model_name || 'kling-v2-master', // V2-master is default
+      mode: request.mode || 'std',
+      model_name: request.model_name || 'kling-v2-master',
     };
 
     try {
@@ -380,14 +361,14 @@ export default class KlingClient {
       throw new Error(`Effect "${request.effect_scene}" requires exactly 1 image`);
     }
     
-    // Process all image URLs (local files become base64 data URIs)
     const processedImageUrls = await Promise.all(
       request.image_urls.map(url => this.processMediaUrl(url))
     );
-    
+    const filteredUrls = processedImageUrls.filter((url): url is string => url !== undefined);
+
     const body: any = {
       input: {
-        image_urls: processedImageUrls.filter((url): url is string => url !== undefined),
+        image_urls: filteredUrls,
         effect_scene: request.effect_scene,
         duration: request.duration || '5',
       }
@@ -410,15 +391,14 @@ export default class KlingClient {
   async generateImage(request: ImageGenerationRequest): Promise<{ task_id: string }> {
     const path = '/v1/images/generation';
     
-    // Process reference image URL if provided
-    const ref_image_url = await this.processMediaUrl(request.ref_image_url);
-    
+    const ref_image = await this.processMediaUrl(request.ref_image_url);
+
     const body: any = {
       prompt: request.prompt,
       negative_prompt: request.negative_prompt || '',
       aspect_ratio: request.aspect_ratio || '1:1',
       num_images: request.num_images || 1,
-      ...(ref_image_url && { ref_image_url }),
+      ...(ref_image && { ref_image }),
       ...(request.ref_image_weight && { ref_image_weight: request.ref_image_weight }),
     };
     
@@ -461,16 +441,15 @@ export default class KlingClient {
       throw new Error('Maximum 5 clothing items allowed per request');
     }
     
-    // Process all image URLs
     const person_image_url = await this.processMediaUrl(request.person_image_url);
     const cloth_image_urls = await Promise.all(
       request.cloth_image_urls.map(url => this.processMediaUrl(url))
     );
-    
-    const body = {
+
+    const body: any = {
       model_name: request.model_name || 'kolors-virtual-try-on-v1.5',
       person_image_url: person_image_url!,
-      cloth_image_urls: cloth_image_urls,
+      cloth_image_urls,
     };
 
     try {

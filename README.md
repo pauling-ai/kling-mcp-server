@@ -292,21 +292,13 @@ Never lose your creations - everything is saved locally with descriptive filenam
 }
 ```
 
-### Local File Support
+### File Inputs
 
-Local files are supported and are read directly from your machine. They are **base64-encoded and sent inline** to the Kling API — your files are never uploaded to third-party storage.
+All file inputs must be **public URLs** — local file paths are not supported when running via npx.
 
-Supported inputs:
-- **Images**: PNG, JPG, JPEG, GIF, WebP
-- **Audio** (for lip-sync): MP3, WAV, FLAC, OGG, M4A, AAC
-- **Videos**: MP4, MOV, WebM (sent inline; very large files may hit API limits)
-
-Examples:
 ```javascript
-image_url: "/Users/me/image.jpg"           // Local file path
-image_url: "file:///Users/me/image.jpg"    // File URL
-image_url: "https://example.com/image.jpg" // Public URL (used directly)
-audio_url: "/Users/me/audio.mp3"           // Local audio for lip-sync
+image_url: "https://example.com/image.jpg" // Public URL
+audio_url: "https://example.com/audio.mp3" // Public URL
 ```
 
 ### Image Generation Options
