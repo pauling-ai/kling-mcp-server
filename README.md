@@ -18,62 +18,28 @@ Transform Claude into a professional AI content studio with complete access to K
 
 ## Quick Start
 
-> **Warning:** The original `mcp-kling` package on npm (v5.2.0 and earlier) contains hardcoded credentials and silently uploads your local files to a third-party Supabase bucket. This repo is the cleaned, fixed version. **Do not install the original package.**
-
-### 1. Install
-
-**Build from this repo (recommended):**
 ```bash
-git clone <this-repo-url>
-cd mcp-kling
+git clone https://github.com/pauling-ai/kling-mcp-server.git
+cd kling-mcp-server
 npm install
 npm run build
 ```
 
-**Or run directly without installing:**
-```bash
-npx tsx /path/to/this-repo/src/index.ts
-```
-
-If you want to use it via `npx` in Claude Desktop, you must first publish this fork under your own npm scope (e.g. `@yourname/mcp-kling`) or use the local path in your Claude config.
-
-### 2. Get your Kling API Credentials
-
-1. Go to [Kling AI Developer Console](https://app.klingai.com/global/dev/api-key)
-2. Click **"+ Create a new API Key"**
-3. Save both your **Access Key** and **Secret Key**
-
-### 3. Configure Credentials
-
-**Option A: Config file (recommended)**
-
 Create `~/.kling.json`:
 ```json
 {
-  "accessKey": "YOUR_ACCESS_KEY_HERE",
-  "secretKey": "YOUR_SECRET_KEY_HERE"
+  "accessKey": "YOUR_KLING_ACCESS_KEY",
+  "secretKey": "YOUR_KLING_SECRET_KEY"
 }
 ```
 
-**Option B: Environment variables**
-```bash
-export KLING_ACCESS_KEY="YOUR_ACCESS_KEY_HERE"
-export KLING_SECRET_KEY="YOUR_SECRET_KEY_HERE"
-```
+### Claude Desktop
 
-### 4. Add to your AI tool
-
-#### Claude Desktop
-
-Edit your Claude Desktop config file:
-
-**macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
-**Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
-
+`~/Library/Application Support/Claude/claude_desktop_config.json`:
 ```json
 {
   "mcpServers": {
-    "mcp-kling": {
+    "kling": {
       "command": "node",
       "args": ["/absolute/path/to/kling-mcp-server/dist/index.js"]
     }
@@ -81,26 +47,9 @@ Edit your Claude Desktop config file:
 }
 ```
 
-If you are not using `~/.kling.json`, add the env vars:
-```json
-{
-  "mcpServers": {
-    "mcp-kling": {
-      "command": "node",
-      "args": ["/absolute/path/to/kling-mcp-server/dist/index.js"],
-      "env": {
-        "KLING_ACCESS_KEY": "YOUR_ACCESS_KEY_HERE",
-        "KLING_SECRET_KEY": "YOUR_SECRET_KEY_HERE"
-      }
-    }
-  }
-}
-```
+### Codex CLI
 
-#### Codex CLI
-
-Codex CLI uses TOML configuration. Add this to `~/.codex/config.toml`:
-
+`~/.codex/config.toml`:
 ```toml
 [mcp_servers.kling]
 type = "stdio"
@@ -108,21 +57,7 @@ command = "node"
 args = ["/absolute/path/to/kling-mcp-server/dist/index.js"]
 ```
 
-If you are not using `~/.kling.json`, add env vars inline:
-```toml
-[mcp_servers.kling]
-type = "stdio"
-command = "node"
-args = ["/absolute/path/to/kling-mcp-server/dist/index.js"]
-env = { KLING_ACCESS_KEY = "YOUR_ACCESS_KEY_HERE", KLING_SECRET_KEY = "YOUR_SECRET_KEY_HERE" }
-```
-
-Or use the CLI command:
-```bash
-codex mcp add kling -- node /absolute/path/to/kling-mcp-server/dist/index.js
-```
-
-Restart your AI tool and you're ready to generate videos.
+Restart your AI tool.
 
 ## Complete Feature Set - ALL 13 Tools!
 
