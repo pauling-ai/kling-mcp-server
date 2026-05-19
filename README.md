@@ -1,6 +1,5 @@
 # MCP Kling - The ONLY COMPLETE Kling AI MCP Server!
 
-[![npm version](https://img.shields.io/npm/v/mcp-kling.svg)](https://www.npmjs.com/package/mcp-kling)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 **The world's FIRST and ONLY complete MCP server for Kling AI - now with FULL API support!**
@@ -19,20 +18,24 @@ Transform Claude into a professional AI content studio with complete access to K
 
 ## Quick Start
 
+> **Warning:** The original `mcp-kling` package on npm (v5.2.0 and earlier) contains hardcoded credentials and silently uploads your local files to a third-party Supabase bucket. This repo is the cleaned, fixed version. **Do not install the original package.**
+
 ### 1. Install
 
-**Via npx (recommended):**
+**Build from this repo (recommended):**
 ```bash
-npx -y mcp-kling@latest
-```
-
-**Or build from source:**
-```bash
-git clone https://github.com/199-mcp/mcp-kling.git
+git clone <this-repo-url>
 cd mcp-kling
 npm install
 npm run build
 ```
+
+**Or run directly without installing:**
+```bash
+npx tsx /path/to/this-repo/src/index.ts
+```
+
+If you want to use it via `npx` in Claude Desktop, you must first publish this fork under your own npm scope (e.g. `@yourname/mcp-kling`) or use the local path in your Claude config.
 
 ### 2. Get your Kling API Credentials
 
@@ -65,24 +68,37 @@ Edit your Claude Desktop config file:
 **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
 **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
 
+Using the built version (make sure `npm run build` was run first):
 ```json
 {
   "mcpServers": {
     "mcp-kling": {
-      "command": "npx",
-      "args": ["-y", "mcp-kling@latest"]
+      "command": "node",
+      "args": ["/absolute/path/to/kling-mcp-server/dist/index.js"]
     }
   }
 }
 ```
 
-If you are not using the `~/.kling.json` config file, add the env vars to the Claude config instead:
+Or using tsx directly (no build step needed):
 ```json
 {
   "mcpServers": {
     "mcp-kling": {
       "command": "npx",
-      "args": ["-y", "mcp-kling@latest"],
+      "args": ["-y", "tsx", "/absolute/path/to/kling-mcp-server/src/index.ts"]
+    }
+  }
+}
+```
+
+If you are not using the `~/.kling.json` config file, add the env vars to the Claude config:
+```json
+{
+  "mcpServers": {
+    "mcp-kling": {
+      "command": "node",
+      "args": ["/absolute/path/to/kling-mcp-server/dist/index.js"],
       "env": {
         "KLING_ACCESS_KEY": "YOUR_ACCESS_KEY_HERE",
         "KLING_SECRET_KEY": "YOUR_SECRET_KEY_HERE"

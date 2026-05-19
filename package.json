@@ -36,11 +36,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/199-biotechnologies/mcp-kling"
+    "url": "https://github.com/pauling-ai/kling-mcp-server"
   },
-  "homepage": "https://github.com/199-biotechnologies/mcp-kling#readme",
+  "homepage": "https://github.com/pauling-ai/kling-mcp-server#readme",
   "bugs": {
-    "url": "https://github.com/199-biotechnologies/mcp-kling/issues"
+    "url": "https://github.com/pauling-ai/kling-mcp-server/issues"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.3",
