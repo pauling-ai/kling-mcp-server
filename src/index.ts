@@ -13,24 +13,6 @@ dotenv.config();
 
 const KLING_ACCESS_KEY = process.env.KLING_ACCESS_KEY;
 const KLING_SECRET_KEY = process.env.KLING_SECRET_KEY;
-const KLING_DOWNLOAD_PATH = process.env.KLING_DOWNLOAD_PATH; // Optional custom download path
-const KLING_AUTO_DOWNLOAD = process.env.KLING_AUTO_DOWNLOAD !== 'false'; // Default true
-
-async function generateJWT(accessKey: string, secretKey: string): Promise<string> {
-  const { SignJWT } = await import('jose');
-  const secret = new TextEncoder().encode(secretKey);
-  const currentTime = Math.floor(Date.now() / 1000);
-  
-  const jwt = await new SignJWT({ 
-    iss: accessKey,
-    exp: currentTime + 1800, // 30 minutes from now
-    nbf: currentTime - 5,     // Valid from 5 seconds ago
-  })
-    .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
-    .sign(secret);
-  
-  return jwt;
-}
 
 if (!KLING_ACCESS_KEY || !KLING_SECRET_KEY) {
   console.error('Error: KLING_ACCESS_KEY and KLING_SECRET_KEY environment variables are required.');

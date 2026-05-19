@@ -194,7 +194,7 @@ Claude: Creating a batch of cyberpunk cat images!
 
 ### 👗 Virtual Try-On
 ```
-You: Try this red dress (dress.jpg) on my photo (me.jpg)
+You: Try this red dress (https://example.com/dress.jpg) on my photo (https://example.com/me.jpg)
 
 Claude: I'll help you virtually try on that dress!
 
@@ -291,22 +291,11 @@ Never lose your creations - everything is saved locally with descriptive filenam
 }
 ```
 
-### Local File Support
+### URL Requirements
 
-**NEW in v5.2.0**: The MCP server now automatically handles local files! 
+For security reasons, this server only accepts **publicly accessible HTTP(S) URLs** for images, videos, and audio files. Local file paths and `file://` URLs are **not supported**.
 
-- **Automatic Upload**: Local files and file:// URLs are automatically uploaded to cloud storage
-- **Seamless Integration**: Just provide local file paths - the server handles the rest
-- **Supported Formats**: Images (PNG, JPG, JPEG, GIF, WebP) and Videos (MP4, WebM, MOV)
-- **Zero Configuration**: Works out of the box with Supabase integration
-
-Examples:
-```javascript
-// All of these work automatically:
-image_url: "/Users/me/image.jpg"           // Local file path
-image_url: "file:///Users/me/image.jpg"    // File URL
-image_url: "https://example.com/image.jpg" // HTTP URL (used directly)
-```
+If you need to use a local file, upload it to a temporary hosting service first (e.g., Imgur, transfer.sh, or your own cloud storage) and provide the resulting public URL.
 
 ### Image Generation Options
 ```javascript

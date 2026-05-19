@@ -4,7 +4,6 @@ import { promises as fs } from 'fs';
 import { createWriteStream } from 'fs';
 import path from 'path';
 import { homedir } from 'os';
-import { uploadFromUrl } from './file-uploader.js';
 
 export interface CameraControlConfig {
   horizontal?: number;  // [-10, 10]
@@ -152,27 +151,19 @@ export default class KlingClient {
     return jwt;
   }
   
-  private async processImageUrl(url: string | undefined): Promise<string | undefined> {
+  private validateUrl(url: string | undefined): string | undefined {
     if (!url) return undefined;
-    
-    if (url.startsWith('file://') || !url.startsWith('http')) {
-      try {
-        const uploadedUrl = await uploadFromUrl(url);
-        console.log(`Uploaded file to: ${uploadedUrl}`);
-        return uploadedUrl;
-      } catch (uploadError) {
-        throw new Error(`Failed to upload file: ${uploadError instanceof Error ? uploadError.message : String(uploadError)}`);
-      }
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      throw new Error('Only publicly accessible HTTP(S) URLs are supported. Local file paths and file:// URLs are not accepted for security reasons.');
     }
-    
     return url;
   }
 
   async generateVideo(request: VideoGenerationRequest): Promise<{ task_id: string }> {
     const path = '/v1/videos/text2video';
     
-    // Process any image URLs
-    const ref_image_url = await this.processImageUrl(request.ref_image_url);
+    // Validate any image URLs
+    const ref_image_url = this.validateUrl(request.ref_image_url);
     
     const body: any = {
       prompt: request.prompt,
@@ -208,8 +199,8 @@ export default class KlingClient {
       throw new Error('image_url is required for image-to-video generation');
     }
     
-    // Process the image URL
-    const imageUrl = await this.processImageUrl(request.image_url);
+    // Validate the image URL
+    const imageUrl = this.validateUrl(request.image_url);
 
     const body: any = {
       image: imageUrl, // API uses 'image' not 'image_url'
@@ -271,8 +262,8 @@ export default class KlingClient {
   async createLipsync(request: LipsyncRequest): Promise<{ task_id: string }> {
     const path = '/v1/videos/lip-sync';
     
-    // Process video URL
-    const video_url = await this.processImageUrl(request.video_url);
+    // Validate video URL
+    const video_url = this.validateUrl(request.video_url);
     
     const input: any = {
       video_url: video_url!,
@@ -346,14 +337,12 @@ export default class KlingClient {
       throw new Error(`Effect "${request.effect_scene}" requires exactly 1 image`);
     }
     
-    // Process all image URLs
-    const processedImageUrls = await Promise.all(
-      request.image_urls.map(url => this.processImageUrl(url))
-    );
+    // Validate all image URLs
+    const validatedImageUrls = request.image_urls.map(url => this.validateUrl(url)).filter((url): url is string => url !== undefined);
     
     const body: any = {
       input: {
-        image_urls: processedImageUrls.filter(url => url !== undefined),
+        image_urls: validatedImageUrls,
         effect_scene: request.effect_scene,
         duration: request.duration || '5',
       }
@@ -376,8 +365,8 @@ export default class KlingClient {
   async generateImage(request: ImageGenerationRequest): Promise<{ task_id: string }> {
     const path = '/v1/images/generation';
     
-    // Process reference image URL if provided
-    const ref_image_url = await this.processImageUrl(request.ref_image_url);
+    // Validate reference image URL if provided
+    const ref_image_url = this.validateUrl(request.ref_image_url);
     
     const body: any = {
       prompt: request.prompt,
@@ -427,16 +416,14 @@ export default class KlingClient {
       throw new Error('Maximum 5 clothing items allowed per request');
     }
     
-    // Process all image URLs
-    const person_image_url = await this.processImageUrl(request.person_image_url);
-    const cloth_image_urls = await Promise.all(
-      request.cloth_image_urls.map(url => this.processImageUrl(url))
-    );
+    // Validate all image URLs
+    const person_image_url = this.validateUrl(request.person_image_url);
+    const cloth_image_urls = request.cloth_image_urls.map(url => this.validateUrl(url)).filter((url): url is string => url !== undefined);
     
     const body = {
       model_name: request.model_name || 'kolors-virtual-try-on-v1.5',
       person_image_url: person_image_url!,
-      cloth_image_urls: cloth_image_urls.filter(url => url !== undefined),
+      cloth_image_urls: cloth_image_urls,
     };
 
     try {
