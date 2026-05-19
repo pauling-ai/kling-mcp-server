@@ -3,8 +3,13 @@
 // Test script for Kling API endpoints with correct formats
 import { SignJWT } from 'jose';
 
-const KLING_ACCESS_KEY = process.env.KLING_ACCESS_KEY || 'AnG8dFHyyyJ33trBEGKTmAKgfR4EFQJ8';
-const KLING_SECRET_KEY = process.env.KLING_SECRET_KEY || '9YGL3FCdnmrbCfnyDKPD3HCnteRaTLDC';
+const KLING_ACCESS_KEY = process.env.KLING_ACCESS_KEY;
+const KLING_SECRET_KEY = process.env.KLING_SECRET_KEY;
+
+if (!KLING_ACCESS_KEY || !KLING_SECRET_KEY) {
+  console.error('Error: KLING_ACCESS_KEY and KLING_SECRET_KEY environment variables are required.');
+  process.exit(1);
+}
 
 async function generateJWT(accessKey, secretKey) {
   const secret = new TextEncoder().encode(secretKey);
@@ -107,7 +112,4 @@ console.log('2. Some endpoints may require "input" wrapper object');
 console.log('3. Image generation endpoint might be /v1/images/text2image');
 console.log('4. Voice IDs need to match available options');
 
-// Generate a fresh JWT for testing
-const jwt = await generateJWT(KLING_ACCESS_KEY, KLING_SECRET_KEY);
-console.log('\n\n=== Fresh JWT Token for Testing ===');
-console.log(jwt);
+// To generate a fresh JWT for testing, use the jose library or the generate-jwt script with your own credentials.
