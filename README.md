@@ -18,43 +18,38 @@ Transform Claude into a professional AI content studio with complete access to K
 
 ## Quick Start
 
-```bash
-git clone https://github.com/pauling-ai/kling-mcp-server.git
-cd kling-mcp-server
-npm install
-npm run build
-```
+Get your API keys at https://app.klingai.com/global/dev/api-key, then create `~/.kling.json`:
 
-Create `~/.kling.json`:
 ```json
 {
-  "accessKey": "YOUR_KLING_ACCESS_KEY",
-  "secretKey": "YOUR_KLING_SECRET_KEY"
-}
-```
-
-### Claude Desktop
-
-`~/Library/Application Support/Claude/claude_desktop_config.json`:
-```json
-{
-  "mcpServers": {
-    "kling": {
-      "command": "node",
-      "args": ["/absolute/path/to/kling-mcp-server/dist/index.js"]
-    }
-  }
+  "accessKey": "your_access_key",
+  "secretKey": "your_secret_key"
 }
 ```
 
 ### Codex CLI
 
-`~/.codex/config.toml`:
+Add to `~/.codex/config.toml`:
+
 ```toml
 [mcp_servers.kling]
-type = "stdio"
-command = "node"
-args = ["/absolute/path/to/kling-mcp-server/dist/index.js"]
+command = "npx"
+args = ["--yes", "--package", "git+https://github.com/pauling-ai/kling-mcp-server", "mcp-kling"]
+```
+
+### Claude Desktop
+
+Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "kling": {
+      "command": "npx",
+      "args": ["--yes", "--package", "git+https://github.com/pauling-ai/kling-mcp-server", "mcp-kling"]
+    }
+  }
+}
 ```
 
 Restart your AI tool.

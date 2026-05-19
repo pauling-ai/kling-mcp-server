@@ -9,10 +9,12 @@ import {
 import KlingClient, { VideoGenerationRequest, VideoExtensionRequest, LipsyncRequest, VideoEffectsRequest, ImageGenerationRequest, VirtualTryOnRequest, TaskListParams } from './kling-client.js';
 import { readFileSync, existsSync } from 'fs';
 import { homedir } from 'os';
-import { join } from 'path';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 
-dotenv.config();
+const __dirname = dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: join(__dirname, '.env') });
 
 function loadConfig(): { accessKey: string; secretKey: string } {
   // 1. Try ~/.kling.json
@@ -38,18 +40,16 @@ function loadConfig(): { accessKey: string; secretKey: string } {
 
   // 3. Fail with helpful instructions
   console.error('Error: Kling API credentials not found.');
-  console.error('\nOption 1: Create ~/.kling.json');
+  console.error('\nOption 1: Create a .env file next to dist/index.js (or src/index.ts):');
+  console.error('  KLING_ACCESS_KEY=your_access_key');
+  console.error('  KLING_SECRET_KEY=your_secret_key');
+  console.error('\nOption 2: Set environment variables (or add "env" in codex.toml / claude_desktop_config.json):');
+  console.error('  KLING_ACCESS_KEY=your_access_key');
+  console.error('  KLING_SECRET_KEY=your_secret_key');
+  console.error('\nOption 3: Create ~/.kling.json');
   console.error('{');
   console.error('  "accessKey": "your_access_key",');
   console.error('  "secretKey": "your_secret_key"');
-  console.error('}');
-  console.error('\nOption 2: Set environment variables:');
-  console.error('  KLING_ACCESS_KEY=your_access_key');
-  console.error('  KLING_SECRET_KEY=your_secret_key');
-  console.error('\nOption 3: Add to your Claude Desktop config:');
-  console.error('"env": {');
-  console.error('  "KLING_ACCESS_KEY": "your_access_key",');
-  console.error('  "KLING_SECRET_KEY": "your_secret_key"');
   console.error('}');
   console.error('\nTo get your keys:');
   console.error('1. Go to https://app.klingai.com/global/dev/api-key');
