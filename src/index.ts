@@ -7,30 +7,62 @@ import {
   Tool,
 } from '@modelcontextprotocol/sdk/types.js';
 import KlingClient, { VideoGenerationRequest, VideoExtensionRequest, LipsyncRequest, VideoEffectsRequest, ImageGenerationRequest, VirtualTryOnRequest, TaskListParams } from './kling-client.js';
+import { readFileSync, existsSync } from 'fs';
+import { homedir } from 'os';
+import { join } from 'path';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
-const KLING_ACCESS_KEY = process.env.KLING_ACCESS_KEY;
-const KLING_SECRET_KEY = process.env.KLING_SECRET_KEY;
+function loadConfig(): { accessKey: string; secretKey: string } {
+  // 1. Try ~/.kling.json
+  const configPath = join(homedir(), '.kling.json');
+  if (existsSync(configPath)) {
+    try {
+      const raw = readFileSync(configPath, 'utf-8');
+      const parsed = JSON.parse(raw);
+      if (parsed.accessKey && parsed.secretKey) {
+        return { accessKey: parsed.accessKey, secretKey: parsed.secretKey };
+      }
+    } catch (err) {
+      console.error('Error reading ~/.kling.json:', err instanceof Error ? err.message : String(err));
+    }
+  }
 
-if (!KLING_ACCESS_KEY || !KLING_SECRET_KEY) {
-  console.error('Error: KLING_ACCESS_KEY and KLING_SECRET_KEY environment variables are required.');
-  console.error('\nPlease add them to your Claude Desktop configuration:');
+  // 2. Fall back to environment variables
+  const accessKey = process.env.KLING_ACCESS_KEY;
+  const secretKey = process.env.KLING_SECRET_KEY;
+  if (accessKey && secretKey) {
+    return { accessKey, secretKey };
+  }
+
+  // 3. Fail with helpful instructions
+  console.error('Error: Kling API credentials not found.');
+  console.error('\nOption 1: Create ~/.kling.json');
+  console.error('{');
+  console.error('  "accessKey": "your_access_key",');
+  console.error('  "secretKey": "your_secret_key"');
+  console.error('}');
+  console.error('\nOption 2: Set environment variables:');
+  console.error('  KLING_ACCESS_KEY=your_access_key');
+  console.error('  KLING_SECRET_KEY=your_secret_key');
+  console.error('\nOption 3: Add to your Claude Desktop config:');
   console.error('"env": {');
   console.error('  "KLING_ACCESS_KEY": "your_access_key",');
   console.error('  "KLING_SECRET_KEY": "your_secret_key"');
   console.error('}');
   console.error('\nTo get your keys:');
-  console.error('1. Go to klingai.com developer console');
+  console.error('1. Go to https://app.klingai.com/global/dev/api-key');
   console.error('2. Create a new API key');
   console.error('3. Copy both Access Key and Secret Key');
   process.exit(1);
 }
 
+const config = loadConfig();
+
 // Initialize Kling client with access key and secret key
 // JWT will be generated fresh for each request
-const klingClient = new KlingClient(KLING_ACCESS_KEY, KLING_SECRET_KEY);
+const klingClient = new KlingClient(config.accessKey, config.secretKey);
 
 const server = new Server(
   {
