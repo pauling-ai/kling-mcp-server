@@ -12,4 +12,5 @@ yarn-error.log*
 *.swp
 *.swo
 *~
-test-upload.ts.idea/
+test-upload.ts
+.idea/
