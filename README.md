@@ -19,39 +19,80 @@ Transform Claude into a professional AI content studio with complete access to K
 
 ## Quick Start
 
-It's incredibly easy to get started!
+### 1. Install
 
-### 1. Get your Kling API Credentials
+**Via npx (recommended):**
+```bash
+npx -y mcp-kling@latest
+```
+
+**Or build from source:**
+```bash
+git clone https://github.com/199-mcp/mcp-kling.git
+cd mcp-kling
+npm install
+npm run build
+```
+
+### 2. Get your Kling API Credentials
 
 1. Go to [Kling AI Developer Console](https://app.klingai.com/global/dev/api-key)
 2. Click **"+ Create a new API Key"**
 3. Save both your **Access Key** and **Secret Key**
 
-### 2. Add to Claude Desktop
+### 3. Configure Credentials
 
-Add this configuration to your Claude Desktop config file:
+**Option A: Config file (recommended)**
+
+Create `~/.kling.json`:
+```json
+{
+  "accessKey": "YOUR_ACCESS_KEY_HERE",
+  "secretKey": "YOUR_SECRET_KEY_HERE"
+}
+```
+
+**Option B: Environment variables**
+```bash
+export KLING_ACCESS_KEY="YOUR_ACCESS_KEY_HERE"
+export KLING_SECRET_KEY="YOUR_SECRET_KEY_HERE"
+```
+
+### 4. Add to Claude Desktop
+
+Edit your Claude Desktop config file:
 
 **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
 **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
 
 ```json
 {
- "mcpServers": {
- "mcp-kling": {
- "command": "npx",
- "args": ["-y", "mcp-kling@latest"],
- "env": {
- "KLING_ACCESS_KEY": "YOUR_ACCESS_KEY_HERE",
- "KLING_SECRET_KEY": "YOUR_SECRET_KEY_HERE"
- }
- }
- }
+  "mcpServers": {
+    "mcp-kling": {
+      "command": "npx",
+      "args": ["-y", "mcp-kling@latest"]
+    }
+  }
 }
 ```
 
-The MCP server will automatically generate JWT tokens as needed using your credentials.
+If you are not using the `~/.kling.json` config file, add the env vars to the Claude config instead:
+```json
+{
+  "mcpServers": {
+    "mcp-kling": {
+      "command": "npx",
+      "args": ["-y", "mcp-kling@latest"],
+      "env": {
+        "KLING_ACCESS_KEY": "YOUR_ACCESS_KEY_HERE",
+        "KLING_SECRET_KEY": "YOUR_SECRET_KEY_HERE"
+      }
+    }
+  }
+}
+```
 
-That's it! Restart Claude Desktop and you're ready to generate amazing videos!
+Restart Claude Desktop and you're ready to generate videos.
 
 ## Complete Feature Set - ALL 13 Tools!
 
