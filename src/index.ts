@@ -103,17 +103,17 @@ const TOOLS: Tool[] = [
         },
         duration: {
           type: 'string',
-          enum: ['5', '10'],
+          enum: ['3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15'],
           description: 'Video duration in seconds (default: 5)',
         },
         mode: {
           type: 'string',
           enum: ['std', 'pro', '4k'],
-          description: 'Video generation mode (default: standard)',
+          description: 'Video quality mode: std (720p), pro (1080p), 4k (default: std)',
         },
         cfg_scale: {
           type: 'number',
-          description: 'Creative freedom scale 0-1 (0=more creative, 1=more adherent to prompt, default: 0.5)',
+          description: 'Prompt adherence 0-1 (0=creative, 1=strict; not supported on v2.x models, default: 0.5)',
           minimum: 0,
           maximum: 1,
         },
@@ -176,49 +176,49 @@ const TOOLS: Tool[] = [
   },
   {
     name: 'generate_image_to_video',
-    description: 'Generate a video from an image using Kling AI',
+    description: 'Generate a video from a reference image using Kling AI. Pass a public URL or local file path as image_url — local files are automatically base64-encoded. Image must be JPG/JPEG/PNG, max 10MB, min 300px. At least one of image_url or image_tail_url is required.',
     inputSchema: {
       type: 'object',
       properties: {
         image_url: {
           type: 'string',
-          description: 'URL or local file path of the starting image (PNG, JPG, JPEG, WebP)',
+          description: 'Starting frame: public URL or local file path (JPG/JPEG/PNG, max 10MB, min 300px)',
         },
         image_tail_url: {
           type: 'string',
-          description: 'URL or local file path of the ending image (optional)',
+          description: 'Ending frame: public URL or local file path (optional, same format requirements)',
         },
         prompt: {
           type: 'string',
-          description: 'Text prompt describing the motion and transformation',
+          description: 'Text prompt describing the motion (max 2500 characters)',
         },
         negative_prompt: {
           type: 'string',
-          description: 'Text describing what to avoid in the video (optional)',
+          description: 'Text describing what to avoid (optional, max 2500 characters)',
         },
         model_name: {
           type: 'string',
           enum: ['kling-v1', 'kling-v1-5', 'kling-v1-6', 'kling-v2-master', 'kling-v2-1', 'kling-v2-1-master', 'kling-v2-5-turbo', 'kling-v2-6', 'kling-v3'],
-          description: 'Model version to use (default: kling-v2-master)',
+          description: 'Model version (default: kling-v2-master)',
         },
         duration: {
           type: 'string',
-          enum: ['5', '10'],
+          enum: ['3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15'],
           description: 'Video duration in seconds (default: 5)',
         },
         mode: {
           type: 'string',
           enum: ['std', 'pro', '4k'],
-          description: 'Video generation mode (default: standard)',
+          description: 'Video quality mode: std (720p), pro (1080p), 4k (default: std)',
         },
         cfg_scale: {
           type: 'number',
-          description: 'Creative freedom scale 0-1 (default: 0.5)',
+          description: 'Prompt adherence 0-1 (not supported on v2.x models, default: 0.5)',
           minimum: 0,
           maximum: 1,
         },
       },
-      required: ['image_url', 'prompt'],
+      required: ['prompt'],
     },
   },
   {
@@ -262,7 +262,7 @@ const TOOLS: Tool[] = [
         mode: {
           type: 'string',
           enum: ['std', 'pro', '4k'],
-          description: 'Video generation mode (default: standard)',
+          description: 'Video quality mode: std (720p), pro (1080p), 4k (default: std)',
         },
       },
       required: ['task_id', 'prompt'],
@@ -326,7 +326,7 @@ const TOOLS: Tool[] = [
         },
         duration: {
           type: 'string',
-          enum: ['5', '10'],
+          enum: ['3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15'],
           description: 'Video duration in seconds (default: 5)',
         },
         model_name: {

@@ -59,17 +59,18 @@ Restart your AI tool.
 ### Video Generation
 
 #### 1. `generate_video`
-Create stunning videos from text descriptions.
-- **Models**: v1.0, v1.5, v1.6
-- **Duration**: 5 or 10 seconds
+Create videos from text descriptions.
+- **Models**: kling-v1, kling-v1-5, kling-v1-6, kling-v2-master, kling-v2-1, kling-v2-1-master, kling-v2-5-turbo, kling-v2-6, kling-v3
+- **Duration**: 3–15 seconds
 - **Aspect Ratios**: 16:9, 9:16, 1:1
-- **Modes**: Standard or Professional
+- **Modes**: `std` (720p), `pro` (1080p), `4k`
 
 #### 2. `generate_image_to_video`
-Transform static images into dynamic videos.
-- **Image Types**: PNG, JPG, JPEG, WebP
-- **Motion Control**: Automatic or custom prompts
-- **Camera Movement**: Static, zoom, pan, or auto
+Transform a reference image into a video.
+- **Image input**: public URL or local file path (auto base64-encoded)
+- **Image formats**: JPG, JPEG, PNG (max 10MB, min 300px)
+- **Duration**: 3–15 seconds
+- **Modes**: `std`, `pro`, `4k`
 
 #### 3. `check_video_status`
 Monitor generation progress and auto-download completed videos.
@@ -280,26 +281,30 @@ Never lose your creations - everything is saved locally with descriptive filenam
 ### Video Generation Options
 ```javascript
 {
- model: "kling-v2-master", // v1, v1.5, v1.6, or v2-master
- duration: 10, // 5 or 10 seconds
- aspect_ratio: "16:9", // 16:9, 9:16, 1:1
- mode: "professional", // standard or professional
- cfg_scale: 0.7, // 0-1 (creativity vs accuracy)
- camera_control: { // Camera movement (V1 only)
- type: "simple", // Camera movement type
- config: { zoom: 5 } // Movement parameters
- }
+  model_name: "kling-v3",          // kling-v1, kling-v1-5, kling-v1-6, kling-v2-master,
+                                   // kling-v2-1, kling-v2-1-master, kling-v2-5-turbo,
+                                   // kling-v2-6, kling-v3
+  duration: "10",                  // "3" through "15" seconds
+  aspect_ratio: "16:9",            // "16:9", "9:16", "1:1"
+  mode: "pro",                     // "std" (720p), "pro" (1080p), "4k"
+  cfg_scale: 0.5,                  // 0–1 (not supported on v2.x models)
+  camera_control: {
+    type: "simple",
+    config: { zoom: 5 }
+  }
 }
 ```
 
-### File Inputs
+### Image Inputs
 
-All file inputs must be **public URLs** — local file paths are not supported when running via npx.
+Pass a **public URL** or a **local file path** — local files are read and sent as base64 automatically.
 
-```javascript
-image_url: "https://example.com/image.jpg" // Public URL
-audio_url: "https://example.com/audio.mp3" // Public URL
 ```
+image_url: "https://example.com/image.jpg"   // public URL
+image_url: "/Users/me/photo.jpg"             // local file path
+```
+
+Supported formats: JPG, JPEG, PNG. Max 10MB, minimum 300px on each side.
 
 ### Image Generation Options
 ```javascript
