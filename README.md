@@ -61,14 +61,15 @@ export KLING_ACCESS_KEY="YOUR_ACCESS_KEY_HERE"
 export KLING_SECRET_KEY="YOUR_SECRET_KEY_HERE"
 ```
 
-### 4. Add to Claude Desktop
+### 4. Add to your AI tool
+
+#### Claude Desktop
 
 Edit your Claude Desktop config file:
 
 **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
 **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
 
-Using the built version (make sure `npm run build` was run first):
 ```json
 {
   "mcpServers": {
@@ -80,19 +81,7 @@ Using the built version (make sure `npm run build` was run first):
 }
 ```
 
-Or using tsx directly (no build step needed):
-```json
-{
-  "mcpServers": {
-    "mcp-kling": {
-      "command": "npx",
-      "args": ["-y", "tsx", "/absolute/path/to/kling-mcp-server/src/index.ts"]
-    }
-  }
-}
-```
-
-If you are not using the `~/.kling.json` config file, add the env vars to the Claude config:
+If you are not using `~/.kling.json`, add the env vars:
 ```json
 {
   "mcpServers": {
@@ -108,7 +97,32 @@ If you are not using the `~/.kling.json` config file, add the env vars to the Cl
 }
 ```
 
-Restart Claude Desktop and you're ready to generate videos.
+#### Codex CLI
+
+Codex CLI uses TOML configuration. Add this to `~/.codex/config.toml`:
+
+```toml
+[mcp_servers.kling]
+type = "stdio"
+command = "node"
+args = ["/absolute/path/to/kling-mcp-server/dist/index.js"]
+```
+
+If you are not using `~/.kling.json`, add env vars inline:
+```toml
+[mcp_servers.kling]
+type = "stdio"
+command = "node"
+args = ["/absolute/path/to/kling-mcp-server/dist/index.js"]
+env = { KLING_ACCESS_KEY = "YOUR_ACCESS_KEY_HERE", KLING_SECRET_KEY = "YOUR_SECRET_KEY_HERE" }
+```
+
+Or use the CLI command:
+```bash
+codex mcp add kling -- node /absolute/path/to/kling-mcp-server/dist/index.js
+```
+
+Restart your AI tool and you're ready to generate videos.
 
 ## Complete Feature Set - ALL 13 Tools!
 
